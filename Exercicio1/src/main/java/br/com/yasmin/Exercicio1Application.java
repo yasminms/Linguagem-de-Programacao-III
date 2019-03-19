@@ -1,5 +1,18 @@
 package br.com.yasmin;
 
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,52 +24,64 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
-@SpringBootApplication
-public class Exercicio1Application {
+import br.com.yasmin.domain.Funcionario;
+import br.com.yasmin.repository.FuncionarioRepository;
 
+@SpringBootApplication
+public class Exercicio1Application extends JFrame implements ActionListener{
+	
 	@Autowired
 	private FuncionarioRepository funcionarioRepository;
+	
+	private JList jList = new JList();
+    private DefaultListModel listModel = new DefaultListModel();
 
+	private JLabel lblNome = new JLabel("Nome");
+	private JTextField txtNome = new JTextField();
+	private JButton btAdd = new JButton("Adicionar");
+	private JButton btListar = new JButton("Listar");
+	private JTextArea area = new JTextArea();
+	
+	public Exercicio1Application() {
+		super("Manter Funcionários");
+		this.setSize(600, 480);
+		this.setLocationRelativeTo(null);
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);		
+		this.setLayout(new FlowLayout());
+		this.lblNome.setPreferredSize(new Dimension(50, 30));
+		this.txtNome.setPreferredSize(new Dimension(200, 30));
+		JScrollPane scroll = new JScrollPane(jList);
+		scroll.setPreferredSize(new Dimension(500, 300));
+		this.getContentPane().add(lblNome);
+		this.getContentPane().add(txtNome);
+		this.getContentPane().add(btAdd);
+		this.getContentPane().add(btListar);
+		this.getContentPane().add(scroll);
+		this.setVisible(true);
+		this.btAdd.addActionListener(this);
+		this.btListar.addActionListener(this);
+		jList.setModel(listModel);
+	}
+	
 	public static void main(String[] args) {
 		ApplicationContext c = SpringApplication.run(Exercicio1Application.class, args);
 
 		Exercicio1Application ex1 = c.getBean(Exercicio1Application.class);
-
-		List<Funcionario> funcionarios = new ArrayList<>();
-		
-		//Inserir 50 funcionários
-		for (int i = 0; i < 50; i++) {
-			funcionarios.add(new Funcionario(null, "Funcionário " + i, new Double(i + 1000)));
-		}
-
-//		ex1.funcionarioRepository.saveAll(funcionarios);
-		
-		//Listar os funcionários em ordem crescente por nome
-		System.out.println("----------------------------------------");
-
-		List<Funcionario> funcionariosPage = ex1.funcionarioRepository.findAll(new Sort(Sort.Direction.ASC, "nome"));
-		
-		for (Funcionario funcionario : funcionariosPage) {
-			System.out.println(funcionario.toString());
-		}
-		
-		//Listar os funcionários em ordem decrescente por salário
-		System.out.println("----------------------------------------");
-
-		List<Funcionario> funcionariosPage2 = ex1.funcionarioRepository.findAll(new Sort(Sort.Direction.DESC, "salario"));
-
-		for (Funcionario funcionario : funcionariosPage2) {
-			System.out.println(funcionario.toString());
-		}
-		
-		//Listar os funcionários utilizando o recurso de paginação
-		//Exibir a página 2, considerando 10 elementos por página
-		
-		System.out.println("----------------------------------------");
-		Page<Funcionario> funcionariosPage3 = ex1.funcionarioRepository.findAll(PageRequest.of(2, 10));
-
-		for (Funcionario funcionario : funcionariosPage3) {
-			System.out.println(funcionario.toString());
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if(e.getSource() == btAdd) {			
+			String nome = txtNome.getText();
+			Funcionario funcionario = new Funcionario();
+			funcionario.setNome( nome );
+			funcionarioRepository.save(funcionario);
+			System.out.println("Cadastrando uma pessoa...");			
+		} else if ( e.getSource() == btListar ) {
+			List<Funcionario> listaFuncionarios = funcionarioRepository.findAll();
+			for (Funcionario funcionario : listaFuncionarios) {
+				listModel.addElement(funcionario);
+			}
 		}
 	}
 

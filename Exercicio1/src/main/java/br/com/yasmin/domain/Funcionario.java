@@ -1,4 +1,4 @@
-package br.com.yasmin;
+package br.com.yasmin.domain;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
